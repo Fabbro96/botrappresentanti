@@ -15,17 +15,17 @@ bot = Bot(TOKEN)
 
 # Command: \start -> Starts the bot
 def start_handler(chat_id, user):
-    bot.sendMessage(chat_id, "Ciao {} e benvenuto nel bot dei rappresentanti di uniVR! Usa /help per visualizzare i comandi ".format(user))
+    bot.sendMessage(chat_id, 'Ciao {} e benvenuto nel bot dei rappresentanti di uniVR! Usa /help per visualizzare i comandi '.format(user))
 
 
 # Command: \help -> Prints an help message on the general functions
 def help_handler(chat_id):
-    bot.sendMessage(chat_id, "Usa il comando /univrnews per entrare nel canale ufficiale di UniVR\n\n" +
-                    "Usa /univrnews Canale ufficiale dell'UniVR discord\n\n" +
-                    "Usa /secondoannoinfo per entrare nel gruppo di informatica del secondo anno\n\n" +
-                    "Usa /canaletech per entrare nel gruppo per parlare di tecnologia fra nerd\n\n" +
-                    "Usa /rappresentanti per poter parlare con un rappresentante\n\n" +
-                    "[DISCORD] Usa il command /discord per entrare nel nostro canale discord")
+    bot.sendMessage(chat_id, 'Usa il comando /univrnews per entrare nel canale ufficiale di UniVR\n\n' +
+                    'Usa /univrnews Canale ufficiale dell\'UniVR discord\n\n' +
+                    'Usa /secondoannoinfo per entrare nel gruppo di informatica del secondo anno\n\n' +
+                    'Usa /canaletech per entrare nel gruppo per parlare di tecnologia fra nerd\n\n' +
+                    'Usa /rappresentanti per poter parlare con un rappresentante\n\n' +
+                    '[DISCORD] Usa il command /discord per entrare nel nostro canale discord')
 
 
 # Command: \univrnews -> Link to the News channel
@@ -73,11 +73,29 @@ def biotecnologie_handler(chat_id):
     bot.sendMessage(chat_id,'Contatta qualcuno, boh')
 
 
+# Command: \ticket -> Opens a ticket that allows to submit an anonymous message to Reps
+def ticket_handler(chat_id, user_id):
+    # Id of the ticket handling group
+    # Same as user_id for debug purpose
+    th_chat_id = user_id
+
+    # Sends a DM to the user who invokes the /ticket command
+    bot.sendMessage(user_id, 'Scrivimi qual è il problema :)')
+
+    # TODO Sulla carta è corretto, bisogna capire bene come funziona il getUpdates
+    # Waits for answer (1 minute timeout)
+    response = bot.getUpdates(timeout=60)
+
+    # Sleeps then sends the answers to the ticket handling group
+    for responses in response:
+        bot.sendMessage(th_chat_id, responses['message']['text'])
+
+
 # Main msg handler
-def main_handler(msq):
-    chat_id = msq['chat']['id']
-    command = msq['text']
-    user = msq['from']['username']
+def main_handler(msg):
+    chat_id = msg['chat']['id']
+    command = msg['text']
+    user = msg['from']['username']
 
     if command == '/start':
         start_handler(chat_id, user)
@@ -93,19 +111,21 @@ def main_handler(msq):
         secondoannoinfo_handler(chat_id)
     elif command == '/rappresentanti':
         rappresentanti_handler(chat_id)    
-    elif(command == '/informatica'):
+    elif command == '/informatica':
         informatica_handler(chat_id)
-    elif(command == '/bioinformatica'):
+    elif command == '/bioinformatica':
         bioinformatica_handler(chat_id)
-    elif(command == '/matematica'):
+    elif command == '/matematica':
         matematica_handler(chat_id)
-    elif(command == '/biotecnologie'):
-        biotecnologie_handler(chat_id)        
+    elif command == '/biotecnologie':
+        biotecnologie_handler(chat_id)
+    elif command == '/ticket':
+        ticket_handler(chat_id, msg['from']['id'])
 
 
 # Runs message loop listening for commands invocations
 MessageLoop(bot, handle=main_handler).run_as_thread()
-print("Polling...")
+print('Polling...')
 
 # Keeps the bot running
 while 1:
